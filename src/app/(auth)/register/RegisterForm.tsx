@@ -8,6 +8,7 @@ import {Input} from "@heroui/input";
 import {Button} from "@heroui/react";
 import {RegisterSchema} from "@/lib/schemas/registerSchema";
 import {registerUser} from "@/app/actions/authActions";
+import {handleFormServerErrors} from "@/lib/util";
 
 /**
  * Represents a component for rendering a registration form.
@@ -24,21 +25,12 @@ function RegisterForm(): JSX.Element {
     );
 
     const onSubmit = async (data: RegisterSchema) => {
-        const results = await registerUser(data)
+        const result = await registerUser(data)
 
-        if (results.status === 'success') {
+        if (result.status === 'success') {
             console.log('user registered successfully');
         } else {
-            if (Array.isArray(results.error)) {
-                results.error.forEach((e) => {
-                    const fieldName = e.path.join('.') as 'email' | 'password' | 'name';
-                    setError(fieldName, {
-                        message: e.message,
-                    });
-                });
-            } else {
-                setError('root.serverError', {message: results.error})
-            }
+           handleFormServerErrors(result, setError)
         }
     }
 

@@ -5,10 +5,11 @@ import Link from "next/link";
 import NavLink from "@/components/navbar/NavLink";
 import {auth} from "@/auth";
 import UserMenu from "@/components/navbar/UserMenu";
+import {getUserInfoForNav} from "@/app/actions/userActions";
 
 export default async function TopNav() {
     const session = await auth();
-
+    const userInfo = session?.user && await getUserInfoForNav();
     return (
         <Navbar maxWidth='xl' className='bg-gradient-to-r from-purple-400 to-purple-700'
             classNames={{
@@ -28,7 +29,7 @@ export default async function TopNav() {
             </NavbarContent>
             <NavbarContent justify='end'>
                 {session?.user ? (
-                    <UserMenu user={session.user} />
+                    <UserMenu userInfo={userInfo} />
                 ): (
                     <>
                         <Button as={Link} href='/login' variant='bordered' className='text-white'>Login</Button>
