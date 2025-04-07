@@ -28,8 +28,6 @@ export default async function Home() {
                     </form>
                 </div>
             ) : (<p>NOT SIGNED IN</p>)}
-
-
         </div>
     );
 }

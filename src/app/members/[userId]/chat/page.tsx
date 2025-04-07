@@ -1,17 +1,18 @@
-import {CardBody, CardHeader} from "@heroui/card";
-import {Divider} from "@heroui/react";
 
-export default function ChatPage() {
+import CardInnerWrapper from "@/components/CardInnerWrapper";
+import ChatForm from "@/app/members/[userId]/chat/ChatForm";
+import {getMessageThread} from "@/app/actions/messageActions";
+
+export default async function ChatPage({params}: {params: Promise<{userId: string}>}) {
+    const {userId} = await params;
+    const messages = await getMessageThread(userId);
+    console.log(messages);
+
     return (
-        <>
-            <CardHeader className='text-2xl font-semibold text-secondary'>
-                Chat
-            </CardHeader>
-            <Divider />
-            <CardBody>
-                Chat Page gos here
-            </CardBody>
-
-        </>
+        <CardInnerWrapper
+            header='Chat'
+            body={<div>Chat goes here</div>}
+            footer={<ChatForm/>}
+        />
     )
 }
