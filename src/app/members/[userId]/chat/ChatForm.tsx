@@ -1,7 +1,7 @@
 'use client';
 
 import {messageSchema, MessageSchema} from "@/lib/schemas/messageSchema";
-import React from 'react';
+import React, {useEffect} from 'react';
 import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {Input} from "@heroui/input";
@@ -16,9 +16,14 @@ export default function ChatForm() {
 
     const params = useParams<{userId: string}>();
 
-    const {register, handleSubmit, reset, setError, formState: {isSubmitting, isValid, errors}} = useForm<MessageSchema>({
+    const {register, handleSubmit, reset, setError, setFocus,
+        formState: {isSubmitting, isValid, errors}} = useForm<MessageSchema>({
         resolver: zodResolver(messageSchema),
     })
+
+    useEffect(() => {
+        setFocus('text');
+    }, [setFocus]);
 
     const onSubmit = async (data: MessageSchema) => {
 
@@ -29,12 +34,13 @@ export default function ChatForm() {
         }else{
             reset();
             router.refresh();
+            setTimeout(()=> setFocus('text'), 50);
         }
     }
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className='w-full'>
-            <div className='flex flex items-center gap-2'>
+            <div className='flex items-center gap-2'>
                 <Input
                     fullWidth
                     placeholder='Type a message'
