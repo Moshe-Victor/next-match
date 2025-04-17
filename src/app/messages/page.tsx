@@ -1,14 +1,20 @@
 import React from 'react';
 import MessageSidebar from "@/app/messages/MessageSidebar";
+import {getMessagesByContainer} from "@/app/actions/messageActions";
+import MessageTable from "@/app/messages/MessageTable";
 
-export default function MessagesPage() {
+export default async function MessagesPage({searchParams}:
+                                           { searchParams: Promise<{container: string}> }) {
+    const {container} = await searchParams;
+    const messages = await getMessagesByContainer(container);
+
     return (
         <div className='grid grid-cols-12 gap-5 h-[80vh] mt-10'>
             <div className='col-span-2'>
                 <MessageSidebar/>
             </div>
             <div className='col-span-10'>
-                Message table
+                <MessageTable messages={messages}/>
             </div>
         </div>
     );

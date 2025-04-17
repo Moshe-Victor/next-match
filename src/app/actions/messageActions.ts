@@ -9,16 +9,16 @@ import {mapMessageToMessageDto} from "@/lib/mappings";
 
 export async function createMessage(recipientUserId: string, data: MessageSchema): Promise<ActionResult<Message>> {
 
-    try{
-        
+    try {
+
         const userId = await getAuthUserId();
-        
+
         const validated = messageSchema.safeParse(data);
-        
+
         if (!validated.success) return {status: 'error', error: validated.error.errors}
-        
+
         const {text} = validated.data;
-        
+
         const message = await prisma.message.create({
             data: {
                 text,
@@ -37,7 +37,7 @@ export async function createMessage(recipientUserId: string, data: MessageSchema
 
 export async function getMessageThread(recipientId: string) {
 
-    try{
+    try {
         const userId = await getAuthUserId();
 
         const messages = await prisma.message.findMany({
@@ -58,34 +58,83 @@ export async function getMessageThread(recipientId: string) {
                 created: 'asc'
             },
             select: {
-              id: true,
-              text: true,
-              created: true,
-              dateRead: true,
-              sender: {
-                  select: {
-                      userId: true,
-                      name: true,
-                      image: true
-                  }
-              },
-
-              recipient: {
-                  select: {
-                      userId: true,
-                      name: true,
-                      image: true
-                  }
-              }
-
+                id: true,
+                text: true,
+                created: true,
+                dateRead: true,
+                sender: {
+                    select: {
+                        userId: true,
+                        name: true,
+                        image: true
+                    }
+                },
+                recipient: {
+                    select: {
+                        userId: true,
+                        name: true,
+                        image: true
+                    }
+                }
             }
         })
 
-        return messages.map(message => mapMessageToMessageDto(message))
+        if (messages.length > 0) {
+            await prisma.message.updateMany({
+                where: {
+                    senderId: recipientId,
+                    recipientId: userId,
+                    dateRead: null
+                },
+                data: {dateRead: new Date()}
+            })
+        }
 
-    }catch(error) {
+        return messages.map(message => mapMessageToMessageDto(message))
+    } catch (error) {
         console.log(error);
         throw error;
     }
+}
 
+export async function getMessagesByContainer(container: string){
+    try{
+        const userId = await getAuthUserId();
+        const selector = container === 'outbox' ? 'senderId' : 'recipientId';
+
+        const messages = await prisma.message.findMany({
+            where: {
+                [selector]: userId
+            },
+            orderBy: {
+                created: 'desc'
+            },
+            select: {
+                id: true,
+                text: true,
+                created: true,
+                dateRead: true,
+                sender: {
+                    select: {
+                        userId: true,
+                        name: true,
+                        image: true
+                    }
+                },
+                recipient: {
+                    select: {
+                        userId: true,
+                        name: true,
+                        image: true
+                    }
+                }
+            }
+        })
+
+        return messages.map(message => mapMessageToMessageDto(message));
+    }
+    catch(error){
+        console.log(error);
+        throw error;
+    }
 }

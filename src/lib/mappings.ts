@@ -13,6 +13,6 @@ export function mapMessageToMessageDto(message: MessageWithSenderRecipient) {
         senderImage: message.sender?.image,
         recipientId: message.recipient?.userId,
         recipientImage: message.recipient?.image,
-        recipientNane: message.recipient?.name,
+        recipientName: message.recipient?.name,
     }
 }
