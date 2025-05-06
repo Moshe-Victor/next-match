@@ -1,7 +1,7 @@
 'use client'
-import React from "react";
+import React, {useEffect} from "react";
 import {FaFemale, FaMale} from "react-icons/fa";
-import {usePathname} from "next/navigation";
+import {usePathname, useRouter, useSearchParams} from "next/navigation";
 import {Button} from "@heroui/button";
 import {Select, SelectItem, Slider} from "@heroui/react";
 
@@ -9,6 +9,11 @@ import {Select, SelectItem, Slider} from "@heroui/react";
 export default function Filters() {
 
     const pathname = usePathname();
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const [clientLoaded, setClientLoaded] = React.useState(false);
+
+    useEffect(()=> setClientLoaded(true), []);
 
     const orderByList = [
         {label: 'Last active', value: 'updated'},
@@ -19,6 +24,12 @@ export default function Filters() {
         {value: 'male', icon: FaMale},
         {value: 'female', icon: FaFemale},
     ]
+
+    const handleAgeSelect = (value: number[]) => {
+        const params = new URLSearchParams(searchParams);
+        params.set('ageRange', value.join(','));
+        router.replace(`${pathname}?${params}`);
+    }
 
     if (pathname !== '/members') return null;
 
@@ -36,12 +47,14 @@ export default function Filters() {
                 </div>
                 <div className='flex flex-row items-center gap-2 w-1/4'>
                     <Slider
-
+                        aria-label="slider for age selection"
+                        label={clientLoaded && 'Age range'}
                         color='secondary'
                         size='sm'
                         minValue={18}
                         maxValue={100}
                         defaultValue={[18, 100]}
+                        onChangeEnd={(value) => handleAgeSelect(value as number[])}
                     />
                 </div>
                 <div className='w-1/4'>
