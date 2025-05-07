@@ -3,7 +3,7 @@ import React, {useEffect} from "react";
 import {FaFemale, FaMale} from "react-icons/fa";
 import {usePathname, useRouter, useSearchParams} from "next/navigation";
 import {Button} from "@heroui/button";
-import {Select, SelectItem, Slider} from "@heroui/react";
+import {Select, Selection, SelectItem, Slider} from "@heroui/react";
 
 
 export default function Filters() {
@@ -13,11 +13,11 @@ export default function Filters() {
     const router = useRouter();
     const [clientLoaded, setClientLoaded] = React.useState(false);
 
-    useEffect(()=> setClientLoaded(true), []);
+    useEffect(() => setClientLoaded(true), []);
 
     const orderByList = [
         {label: 'Last active', value: 'updated'},
-        {label: 'Last active', value: 'created'},
+        {label: 'Newest members', value: 'created'},
     ]
 
     const genders = [
@@ -25,9 +25,29 @@ export default function Filters() {
         {value: 'female', icon: FaFemale},
     ]
 
+    const selectedGender =  searchParams.get('gender')?.split(',') || []
+
     const handleAgeSelect = (value: number[]) => {
         const params = new URLSearchParams(searchParams);
         params.set('ageRange', value.join(','));
+        router.replace(`${pathname}?${params}`);
+    }
+
+    const handleOrderSelect = (value: Selection) => {
+        if (value instanceof Set) {
+            const params = new URLSearchParams(searchParams);
+            params.set('orderBy', value.values().next().value as string);
+            router.replace(`${pathname}?${params}`);
+        }
+    }
+
+    const handleGenderSelect = (value: string) => {
+        const params = new URLSearchParams(searchParams);
+        if (selectedGender.includes(value)) {
+            params.set('gender', selectedGender.filter(g => g !== value).toString());
+        } else {
+            params.set('gender', [...selectedGender, value].toString());
+        }
         router.replace(`${pathname}?${params}`);
     }
 
@@ -40,7 +60,13 @@ export default function Filters() {
                 <div className='flex gap-2 items-center'>
                     <div>Gender:</div>
                     {genders.map(({icon: Icon, value}) => (
-                        <Button key={value} size='sm' isIconOnly color='secondary'>
+                        <Button
+                            key={value}
+                            size='sm'
+                            isIconOnly
+                            color={selectedGender.includes(value) ? 'secondary' : 'default'}
+                            onClick={() => handleGenderSelect(value)}
+                        >
                             <Icon size={24}/>
                         </Button>
                     ))}
@@ -61,10 +87,12 @@ export default function Filters() {
                     <Select
                         size='sm'
                         fullWidth
-                        placeholder='Order by'
+                        label='Order by'
                         variant='bordered'
                         color='secondary'
                         aria-label='Order by selector'
+                        selectedKeys={new Set([searchParams.get('orderBy') || 'updated'])}
+                        onSelectionChange={handleOrderSelect}
                     >
                         {orderByList.map((item) => (
                             <SelectItem key={item.value} value={item.value}>
