@@ -79,6 +79,7 @@ export default function Filters() {
                         size='sm'
                         minValue={18}
                         maxValue={100}
+                        // maxValue={Number(searchParams?.get('ageRange')?.toString()?.split(",")[1])  || 100}
                         defaultValue={[18, 100]}
                         onChangeEnd={(value) => handleAgeSelect(value as number[])}
                     />

@@ -1,7 +1,6 @@
 'use server';
 
 import {messageSchema, MessageSchema} from "@/lib/schemas/messageSchema";
-import {Message} from "@prisma/client";
 import {ActionResult, MessageDto} from "@/types";
 import {getAuthUserId} from "@/app/actions/authActions";
 import {prisma} from "@/lib/prisma";
@@ -70,14 +69,19 @@ export async function getMessageThread(recipientId: string) {
         })
 
         if (messages.length > 0) {
+
+            const readMessageIds = messages
+                .filter(m => m.dateRead === null
+                    && m.recipient?.userId === userId
+                    && m.sender?.userId === recipientId)
+            .map(m => m.id);
+
             await prisma.message.updateMany({
-                where: {
-                    senderId: recipientId,
-                    recipientId: userId,
-                    dateRead: null
-                },
+                where: {id: {in: readMessageIds}},
                 data: {dateRead: new Date()}
             })
+
+            await pusherServer.trigger(createChatId(recipientId, userId), 'message:read', readMessageIds);
         }
 
         return messages.map(message => mapMessageToMessageDto(message))
@@ -87,8 +91,8 @@ export async function getMessageThread(recipientId: string) {
     }
 }
 
-export async function getMessagesByContainer(container: string){
-    try{
+export async function getMessagesByContainer(container: string) {
+    try {
         const userId = await getAuthUserId();
 
         const conditions = {
@@ -98,7 +102,7 @@ export async function getMessagesByContainer(container: string){
         }
 
         const messages = await prisma.message.findMany({
-            where:conditions,
+            where: conditions,
             orderBy: {
                 created: 'desc'
             },
@@ -106,14 +110,13 @@ export async function getMessagesByContainer(container: string){
         })
 
         return messages.map(message => mapMessageToMessageDto(message));
-    }
-    catch(error){
+    } catch (error) {
         console.log(error);
         throw error;
     }
 }
 
-export async function deleteMessage(messageId: string, isOutbox: boolean)   {
+export async function deleteMessage(messageId: string, isOutbox: boolean) {
     const selector = isOutbox ? 'senderDeleted' : 'recipientDeleted';
 
     try {
@@ -152,14 +155,13 @@ export async function deleteMessage(messageId: string, isOutbox: boolean)   {
         }
 
 
-    }
-    catch(error){
+    } catch (error) {
         console.log(error);
         throw error;
     }
 }
 
-const  messageSelect = {
+const messageSelect = {
     id: true,
     text: true,
     created: true,
