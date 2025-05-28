@@ -8,7 +8,7 @@ export type PresenceState = {
     set: (id: string[]) => void;
 }
 
-const usePresenceStore = create<PresenceState>()(devtools((set) => ({
+export const usePresenceStore = create<PresenceState>()(devtools((set) => ({
     members: [],
     add: (id: string) => set((state) => ({members: [...state.members, id]})),
     remove: (id: string) => set((state) => ({members: state.members.filter(member => member !== id)})),

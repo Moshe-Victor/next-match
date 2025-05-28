@@ -30,7 +30,7 @@ type MessageDto = {
     recipientImage?: string | null;
 }
 
-type UseFilters = {
+type UserFilters = {
     ageRange: number[];
     orderBy: string;
     gender: string[];
