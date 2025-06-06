@@ -9,10 +9,10 @@ export default async function Home() {
         <div>
             <h1 className='text-3xl text-red-500 font-semibold'>Hello</h1>
 
-            <h3 className="text-2xl font-semibold">User session data:</h3>
+            {/*<h3 className="text-2xl font-semibold">User session data:</h3>*/}
             {session ? (
                 <div>
-                    <pre>{JSON.stringify(session, null, 2)}</pre>
+                    {/*<pre>{JSON.stringify(session, null, 2)}</pre>*/}
                     <form action={async () => {
                         'use server';
                         await signOut();

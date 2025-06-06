@@ -9,10 +9,7 @@ import {useFilters} from "@/hooks/useFilters";
 
 export default function Filters() {
 
-    const pathname = usePathname();
     const {genderList, orderByList, filters, selectAge, selectGender, selectOrder, clientLoaded} = useFilters();
-
-    if (pathname !== '/members') return null;
 
     return (
         <div className='shadow-md py-2'>
